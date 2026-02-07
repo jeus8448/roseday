@@ -35,8 +35,7 @@
 
         /* Glassmorphism Card */
         .card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
             border: 2px solid white;
             padding: 30px 20px;
@@ -122,64 +121,61 @@
             border: 1px dashed #ff416c;
         }
 
-        /* --- FAIL-SAFE EMOJI IMAGES --- */
-        /* Instead of <img> tags that break, we use these Divs */
+        /* Emoji Images */
         .emoji-circle {
-            width: 150px;
-            height: 150px;
+            width: 120px;
+            height: 120px;
             background: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 80px;
+            font-size: 60px;
             margin: 0 auto 20px auto;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            animation: bounce 3s infinite ease-in-out;
             border: 4px solid #ff416c;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        /* Floating Roses Grid */
-        .rose-container {
-            position: fixed; /* Fixed prevents scrolling issues */
-            top: 0; left: 0; right: 0; bottom: 0;
-            overflow: hidden;
-            pointer-events: none;
-            z-index: 1;
-        }
-
+        /* GAME LAYER */
         .game-layer {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.9); /* Dark background for game */
-            z-index: 999; /* Super high Z-Index ensures clickable */
+            background: rgba(0,0,0,0.9); 
+            z-index: 999; 
             display: none;
+        }
+
+        /* THIS IS THE FIX: pointer-events: none allows clicks to pass through text */
+        .game-text {
+            text-align: center; 
+            padding-top: 50px; 
+            position: relative;
+            z-index: 1001;
+            pointer-events: none; /* Crucial Fix */
         }
 
         .floating-rose {
             position: absolute;
-            font-size: 3rem;
+            font-size: 3.5rem; /* Bigger roses */
             cursor: pointer;
             user-select: none;
-            transition: transform 0.2s;
-            animation: floatMove 4s ease-in-out infinite alternate;
-            /* Make clickable area big */
-            padding: 20px; 
-            margin: -20px;
+            /* Make the clickable area huge */
+            padding: 30px; 
+            margin: -30px;
+            z-index: 1002; /* Above everything */
+            pointer-events: auto; /* Re-enable clicks for roses */
+            transition: transform 0.1s;
         }
 
         .floating-rose:active {
-            transform: scale(0.8);
-        }
-
-        @keyframes floatMove {
-            0% { transform: translateY(0) rotate(-5deg); }
-            100% { transform: translateY(-20px) rotate(5deg); }
+            transform: scale(1.5); /* Visual feedback when clicked */
         }
 
         /* Hidden Classes */
@@ -206,12 +202,12 @@
 </head>
 <body>
 
-    <div class="rose-container" id="bg-decoration"></div>
+    <div style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1;" id="bg-decoration"></div>
 
     <div id="screen-garden" class="game-layer">
-        <div style="text-align: center; padding-top: 50px; pointer-events: none;">
-            <h2 style="color: white; font-size: 2rem;">Rose Garden 🌹</h2>
-            <p style="color: #ffdde1; font-weight: bold;">Tap the roses!</p>
+        <div class="game-text">
+            <h2 style="color: white; font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Rose Garden 🌹</h2>
+            <p style="color: #ffdde1; font-weight: bold; font-size: 1.2rem;">Tap ANY rose!</p>
         </div>
         </div>
 
@@ -256,7 +252,7 @@
             </div>
         </div>
 
-        <div id="screen-reveal" class="card hidden" style="z-index: 1000;">
+        <div id="screen-reveal" class="card hidden" style="z-index: 2000;">
             <div class="emoji-circle">🥰</div>
             
             <div class="final-msg" id="finalMessage"></div>
@@ -292,11 +288,9 @@
             const sender = getQueryParam('s');
             const recipient = getQueryParam('r');
 
-            // 1. Add Background Decoration (Non-clickable)
             addBackgroundDecoration();
 
             if (sender && recipient) {
-                // RECIPIENT MODE
                 document.getElementById('screen-create').classList.add('hidden');
                 startRecipientFlow(sender, recipient);
             }
@@ -310,8 +304,8 @@
                 el.style.position = 'absolute';
                 el.style.left = Math.random() * 100 + '%';
                 el.style.top = Math.random() * 100 + '%';
-                el.style.opacity = '0.2'; // Very faint
-                el.style.fontSize = (Math.random() * 30 + 20) + 'px';
+                el.style.opacity = '0.15';
+                el.style.fontSize = (Math.random() * 40 + 20) + 'px';
                 el.style.transform = `rotate(${Math.random() * 360}deg)`;
                 container.appendChild(el);
             }
@@ -350,26 +344,21 @@
             document.getElementById('landingName').textContent = recipient;
             landing.classList.remove('hidden');
 
-            // Wait 2 seconds then START GAME
             setTimeout(() => {
                 landing.classList.add('hidden');
                 initGame(sender);
-            }, 2500);
+            }, 2000);
         }
 
         function initGame(sender) {
-            // 1. Hide the main container to focus on game
             document.querySelector('.container').classList.add('hidden');
-            
-            // 2. Hide background decoration so it doesn't confuse clicks
             document.getElementById('bg-decoration').style.display = 'none';
 
-            // 3. Show Game Layer
             const gameLayer = document.getElementById('screen-garden');
             gameLayer.style.display = 'block';
             
-            // 4. Create Clickable Roses
-            for(let i=0; i<25; i++) {
+            // Create MORE roses (30) to fill gaps
+            for(let i=0; i<30; i++) {
                 createGameRose(sender, gameLayer);
             }
         }
@@ -379,45 +368,40 @@
             rose.innerHTML = '🌹';
             rose.classList.add('floating-rose');
             
-            // Random Position (Keep away from very edges)
-            const x = Math.random() * 80 + 10; 
-            const y = Math.random() * 80 + 10; 
+            // Random Position - 5% to 85% to ensure they are on screen
+            const x = Math.random() * 85 + 5; 
+            const y = Math.random() * 85 + 5; 
             
             rose.style.left = x + '%';
             rose.style.top = y + '%';
             
-            // Random Animation Speed
-            rose.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            // Add a slight delay to animation so they don't all move in sync
+            // But we REMOVED the float animation to make them easier to click!
+            // Instead, just a gentle pulse
+            rose.style.animation = `pulse ${Math.random() * 2 + 1}s infinite`;
 
-            // CLICK EVENT
-            rose.onclick = function(e) {
-                e.stopPropagation(); // Stop click from hitting anything else
+            // CLICK EVENT (Click + Touch)
+            const handleInteract = function(e) {
+                e.preventDefault(); // Stop double firing
+                e.stopPropagation(); // Stop bubbling
                 revealMessage(sender);
             };
-            
-            // TOUCH EVENT (Better for mobile)
-            rose.ontouchstart = function(e) {
-                e.stopPropagation();
-                revealMessage(sender);
-            };
+
+            rose.onclick = handleInteract;
+            rose.ontouchstart = handleInteract;
 
             container.appendChild(rose);
         }
 
         function revealMessage(sender) {
-            // Hide game
             document.getElementById('screen-garden').style.display = 'none';
-            
-            // Show Container & Reveal Card
             document.querySelector('.container').classList.remove('hidden');
             document.getElementById('screen-reveal').classList.remove('hidden');
 
-            // Set Message
             const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
             document.getElementById('finalMessage').textContent = randomQuote;
             document.getElementById('revealSender').textContent = sender;
             
-            // Confetti
             confettiEffect();
         }
 
@@ -431,19 +415,9 @@
                 conf.style.top = '50%';
                 conf.style.fontSize = (Math.random() * 20 + 10) + 'px';
                 conf.style.transition = 'all 1s ease-out';
-                conf.style.zIndex = '2000';
+                conf.style.zIndex = '3000';
+                conf.style.pointerEvents = 'none';
                 document.body.appendChild(conf);
 
                 setTimeout(() => {
-                    const x = (Math.random() - 0.5) * window.innerWidth * 1.5;
-                    const y = (Math.random() - 0.5) * window.innerHeight * 1.5;
-                    conf.style.transform = `translate(${x}px, ${y}px)`;
-                    conf.style.opacity = 0;
-                }, 10);
-
-                setTimeout(() => conf.remove(), 1000);
-            }
-        }
-    </script>
-</body>
-</html>
+                    const x = (Math.random() - 0.5) * window.innerWidth * 1.
