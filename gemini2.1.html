@@ -1,0 +1,372 @@
+This is a classic "viral script" concept. Since I cannot provide a backend database to store the links permanently, I have built this using **URL Parameters**.
+
+This means the "data" (names) is stored directly inside the link itself (e.g., `yoursite.com?sender=Arpit&crush=Candy`). This makes the code **Serverless**, meaning you can host it anywhere (like GitHub Pages or Netlify) for free and it will work immediately.
+
+Here is the complete, single-file solution (HTML + CSS + JS).
+
+### **How to use this:**
+
+1. Copy the code below.
+2. Save it as an `index.html` file.
+3. Open it in your browser to test.
+4. **To share it:** Upload this file to a free host like **Netlify Drop** or **GitHub Pages**.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rose Day Special 🌹</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS STYLES --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Glassmorphism Card */
+        .card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 30px 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        p {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        /* Inputs */
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: #fff;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            outline: none;
+        }
+
+        /* Buttons */
+        .btn {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.3);
+            margin-top: 10px;
+        }
+
+        /* Link Box */
+        .link-box {
+            background: rgba(255,255,255,0.9);
+            padding: 10px;
+            border-radius: 10px;
+            word-break: break-all;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            color: #555;
+            user-select: all;
+        }
+
+        /* Dog Image */
+        .dog-img {
+            width: 200px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Floating Roses Grid */
+        .rose-grid {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none; /* Let clicks pass through unless on a rose */
+        }
+
+        .floating-rose {
+            position: absolute;
+            font-size: 2rem;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: transform 0.3s;
+            animation: pulse 2s infinite;
+        }
+
+        .floating-rose:hover {
+            transform: scale(1.2);
+        }
+
+        /* Hidden Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Message Popup */
+        .final-msg {
+            font-size: 1.3rem;
+            color: #fff;
+            font-weight: 800;
+            line-height: 1.5;
+        }
+
+        .sender-tag {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #ffe0e0;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <div id="screen-create" class="card">
+            <img src="https://cdn3d.iconscout.com/3d/premium/thumb/rose-3d-icon-download-in-png-blend-fbx-gltf-file-formats--flower-love-valentine-plant-romance-pack-holidays-icons-4860133.png" width="80" alt="Rose">
+            <h1>Rose Day Special</h1>
+            <p>Pick a special rose for someone you love 💖</p>
+            
+            <div class="input-group">
+                <label>Your Name</label>
+                <input type="text" id="senderName" placeholder="Enter your name">
+            </div>
+            
+            <div class="input-group">
+                <label>Their Name (Crush/GF/BF)</label>
+                <input type="text" id="crushName" placeholder="Enter their special name">
+            </div>
+
+            <button class="btn" onclick="generateLink()">Create Link</button>
+        </div>
+
+        <div id="screen-share" class="card hidden">
+            <h1>Link Created! ✨</h1>
+            <p>Share this special link with <span id="shareNameDisplay" style="font-weight:bold; color: #fff0f5;"></span> 💖</p>
+            
+            <div class="link-box" id="generatedLink">...</div>
+            
+            <button class="btn" onclick="copyLink()">Copy Link</button>
+            <button class="btn btn-secondary" onclick="location.reload()">Create Another</button>
+        </div>
+
+        <div id="screen-landing" class="hidden">
+            <img src="https://cdn3d.iconscout.com/3d/premium/thumb/dog-holding-rose-in-mouth-3d-illustration-download-in-png-blend-fbx-gltf-file-formats--puppy-animal-pet-love-valentine-day-pack-holidays-illustrations-4952870.png" class="dog-img" alt="Cute Dog">
+            <h2 style="color: white;">Picking something special for <span id="landingName">...</span> 🌹</h2>
+        </div>
+
+        <div id="screen-garden" class="hidden" style="width: 100%; height: 100vh; position: relative;">
+            <div style="text-align: center; padding-top: 50px; z-index: 10; position: relative;">
+                <h2 style="color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.2);">Rose Garden 🌹</h2>
+                <p style="color: #ffe0e0;">Tap a floating rose to reveal its secret...</p>
+                <img src="https://cdn3d.iconscout.com/3d/premium/thumb/cute-dog-3d-illustration-download-in-png-blend-fbx-gltf-file-formats--animal-puppy-pet-pack-animals-illustrations-4645229.png" class="dog-img" style="margin-top: 50px;">
+            </div>
+            </div>
+
+        <div id="screen-reveal" class="card hidden">
+            <img src="https://cdn3d.iconscout.com/3d/premium/thumb/dog-giving-rose-3d-illustration-download-in-png-blend-fbx-gltf-file-formats--puppy-love-flower-valentine-day-pack-holidays-illustrations-4623126.png?f=webp" class="dog-img" alt="Happy Dog">
+            
+            <div class="final-msg" id="finalMessage"></div>
+            
+            <div class="sender-tag">From: <span id="revealSender" style="font-weight: bold; font-size: 1.1rem;"></span></div>
+
+            <button class="btn" style="margin-top: 20px;" onclick="shareOnInsta()">Share on Instagram Story 📸</button>
+            <button class="btn btn-secondary" onclick="location.href=window.location.pathname">Make Your Own</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATA ---
+        const quotes = [
+            "Tum meri zindagi ka sabse khoobsurat ehsaas ho 💖",
+            "You are the rose that makes my garden beautiful 🌹",
+            "Tere bina meri subah nahi hoti, aur shaam nahi dhalti ❤️",
+            "Just like a rose, you bring color to my life! 🎨",
+            "Bas tum hi ho, ab tum hi ho... Meri ashiqui ab tum hi ho 🎶",
+            "Every petal of this rose whispers how much I miss you. 🌸",
+            "Tera haath pakad kar puri duniya ghumna hai 🌍"
+        ];
+
+        // --- UTILS ---
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            const sender = getQueryParam('s');
+            const recipient = getQueryParam('r');
+
+            if (sender && recipient) {
+                // RECIPIENT MODE
+                document.getElementById('screen-create').classList.add('hidden');
+                startRecipientFlow(sender, recipient);
+            } else {
+                // CREATOR MODE
+                // Default state is already visible
+            }
+        };
+
+        // --- CREATOR LOGIC ---
+        function generateLink() {
+            const sender = document.getElementById('senderName').value.trim();
+            const crush = document.getElementById('crushName').value.trim();
+
+            if (!sender || !crush) {
+                alert("Please enter both names! 🥺");
+                return;
+            }
+
+            // Create URL
+            const baseUrl = window.location.href.split('?')[0];
+            const finalLink = `${baseUrl}?s=${encodeURIComponent(sender)}&r=${encodeURIComponent(crush)}`;
+
+            document.getElementById('generatedLink').textContent = finalLink;
+            document.getElementById('shareNameDisplay').textContent = crush;
+            
+            document.getElementById('screen-create').classList.add('hidden');
+            document.getElementById('screen-share').classList.remove('hidden');
+        }
+
+        function copyLink() {
+            const linkText = document.getElementById('generatedLink').textContent;
+            navigator.clipboard.writeText(linkText).then(() => {
+                alert("Link Copied! Send it to your crush now! 💌");
+            });
+        }
+
+        // --- RECIPIENT LOGIC ---
+        function startRecipientFlow(sender, recipient) {
+            // 1. Show Loading Landing
+            const landing = document.getElementById('screen-landing');
+            document.getElementById('landingName').textContent = recipient;
+            landing.classList.remove('hidden');
+
+            // 2. Wait 3 seconds then show Garden
+            setTimeout(() => {
+                landing.classList.add('hidden');
+                showGarden(sender);
+            }, 3000);
+        }
+
+        function showGarden(sender) {
+            const garden = document.getElementById('screen-garden');
+            garden.classList.remove('hidden');
+            
+            // Create Floating Roses
+            for(let i=0; i<15; i++) {
+                createFloatingRose(sender);
+            }
+        }
+
+        function createFloatingRose(sender) {
+            const rose = document.createElement('div');
+            rose.innerHTML = '🌹';
+            rose.classList.add('floating-rose');
+            
+            // Random Position
+            const x = Math.random() * 80 + 10; // 10% to 90% width
+            const y = Math.random() * 80 + 10; // 10% to 90% height
+            
+            rose.style.left = x + '%';
+            rose.style.top = y + '%';
+            
+            // Random Animation Delay
+            rose.style.animationDelay = Math.random() * 2 + 's';
+
+            // Click Event
+            rose.onclick = function() {
+                revealMessage(sender);
+            };
+
+            document.getElementById('screen-garden').appendChild(rose);
+        }
+
+        function revealMessage(sender) {
+            document.getElementById('screen-garden').classList.add('hidden');
+            document.getElementById('screen-reveal').classList.remove('hidden');
+
+            // Pick Random Quote
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            document.getElementById('finalMessage').textContent = randomQuote;
+            document.getElementById('revealSender').textContent = sender;
+        }
+        
+        function shareOnInsta() {
+            alert("Take a screenshot and post it to your story! 📸");
+        }
+    </script>
+</body>
+</html>
+
+```
