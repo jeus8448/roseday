@@ -152,30 +152,29 @@
             display: none;
         }
 
-        /* THIS IS THE FIX: pointer-events: none allows clicks to pass through text */
+        /* POINTER EVENTS NONE allows clicks to pass through text */
         .game-text {
             text-align: center; 
             padding-top: 50px; 
             position: relative;
             z-index: 1001;
-            pointer-events: none; /* Crucial Fix */
+            pointer-events: none; 
         }
 
         .floating-rose {
             position: absolute;
-            font-size: 3.5rem; /* Bigger roses */
+            font-size: 3.5rem; 
             cursor: pointer;
             user-select: none;
-            /* Make the clickable area huge */
             padding: 30px; 
             margin: -30px;
-            z-index: 1002; /* Above everything */
-            pointer-events: auto; /* Re-enable clicks for roses */
+            z-index: 1002; 
+            pointer-events: auto; 
             transition: transform 0.1s;
         }
 
         .floating-rose:active {
-            transform: scale(1.5); /* Visual feedback when clicked */
+            transform: scale(1.5); 
         }
 
         /* Hidden Classes */
@@ -207,217 +206,4 @@
     <div id="screen-garden" class="game-layer">
         <div class="game-text">
             <h2 style="color: white; font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Rose Garden 🌹</h2>
-            <p style="color: #ffdde1; font-weight: bold; font-size: 1.2rem;">Tap ANY rose!</p>
-        </div>
-        </div>
-
-    <div class="container">
-
-        <div id="screen-create" class="card">
-            <div class="emoji-circle">🐶</div>
-            <h1>Rose Day Special</h1>
-            <p>Create a surprise for your favorite person! 💖</p>
-            
-            <div class="input-group">
-                <label>Your Name</label>
-                <input type="text" id="senderName" placeholder="Ex: Arpit">
-            </div>
-            
-            <div class="input-group">
-                <label>Their Name</label>
-                <input type="text" id="crushName" placeholder="Ex: Candy">
-            </div>
-
-            <button class="btn" onclick="generateLink()">Create Surprise ✨</button>
-        </div>
-
-        <div id="screen-share" class="card hidden">
-            <div class="emoji-circle">💌</div>
-            <h1>Link Ready!</h1>
-            <p>Send this special link to <span id="shareNameDisplay" style="font-weight:bold; color: #ff416c;"></span></p>
-            
-            <div class="link-box" id="generatedLink">...</div>
-            
-            <button class="btn" onclick="copyLink()">Copy Link</button>
-            <button class="btn btn-secondary" onclick="location.reload()">Create Another</button>
-        </div>
-
-        <div id="screen-landing" class="hidden">
-            <div class="emoji-circle">🌹</div>
-            <div class="card">
-                <h2 style="color: #d63384;">
-                    Picking a rose for <br><span id="landingName" style="font-size: 1.5em;">...</span>
-                </h2>
-                <p>Loading surprise...</p>
-            </div>
-        </div>
-
-        <div id="screen-reveal" class="card hidden" style="z-index: 2000;">
-            <div class="emoji-circle">🥰</div>
-            
-            <div class="final-msg" id="finalMessage"></div>
-            
-            <div class="sender-tag">With Love From: <br><span id="revealSender" style="font-weight: bold; font-size: 1.5rem; color: #ff416c;"></span> ❤️</div>
-
-            <button class="btn" style="margin-top: 20px;" onclick="alert('Take a screenshot and share it! 📸')">Save Memory 📸</button>
-            <button class="btn btn-secondary" onclick="window.location.href = window.location.pathname">Create Your Own</button>
-        </div>
-
-    </div>
-
-    <script>
-        // --- DATA ---
-        const quotes = [
-            "Tum meri zindagi ka sabse khoobsurat ehsaas ho 💖",
-            "You are the rose that makes my garden beautiful 🌹",
-            "Mere dil ke garden mein bas ek hi phool hai... Tum! 🌸",
-            "Just like a rose, you bring color to my life! 🎨",
-            "Har phool ki khushboo fiki hai tumhare saamne ✨",
-            "My love for you grows every day 🌿",
-            "Tera haath pakad kar puri duniya ghumna hai 🌍"
-        ];
-
-        // --- UTILS ---
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
-        }
-
-        // --- INITIALIZATION ---
-        window.onload = function() {
-            const sender = getQueryParam('s');
-            const recipient = getQueryParam('r');
-
-            addBackgroundDecoration();
-
-            if (sender && recipient) {
-                document.getElementById('screen-create').classList.add('hidden');
-                startRecipientFlow(sender, recipient);
-            }
-        };
-
-        function addBackgroundDecoration() {
-            const container = document.getElementById('bg-decoration');
-            for(let i=0; i<15; i++) {
-                const el = document.createElement('div');
-                el.innerHTML = Math.random() > 0.5 ? '🌹' : '💖';
-                el.style.position = 'absolute';
-                el.style.left = Math.random() * 100 + '%';
-                el.style.top = Math.random() * 100 + '%';
-                el.style.opacity = '0.15';
-                el.style.fontSize = (Math.random() * 40 + 20) + 'px';
-                el.style.transform = `rotate(${Math.random() * 360}deg)`;
-                container.appendChild(el);
-            }
-        }
-
-        // --- CREATOR LOGIC ---
-        function generateLink() {
-            const sender = document.getElementById('senderName').value.trim();
-            const crush = document.getElementById('crushName').value.trim();
-
-            if (!sender || !crush) {
-                alert("Please write both names! 🥺");
-                return;
-            }
-
-            const baseUrl = window.location.href.split('?')[0];
-            const finalLink = `${baseUrl}?s=${encodeURIComponent(sender)}&r=${encodeURIComponent(crush)}`;
-
-            document.getElementById('generatedLink').textContent = finalLink;
-            document.getElementById('shareNameDisplay').textContent = crush;
-            
-            document.getElementById('screen-create').classList.add('hidden');
-            document.getElementById('screen-share').classList.remove('hidden');
-        }
-
-        function copyLink() {
-            const linkText = document.getElementById('generatedLink').textContent;
-            navigator.clipboard.writeText(linkText).then(() => {
-                alert("Link Copied! Send it now! 💌");
-            });
-        }
-
-        // --- RECIPIENT LOGIC ---
-        function startRecipientFlow(sender, recipient) {
-            const landing = document.getElementById('screen-landing');
-            document.getElementById('landingName').textContent = recipient;
-            landing.classList.remove('hidden');
-
-            setTimeout(() => {
-                landing.classList.add('hidden');
-                initGame(sender);
-            }, 2000);
-        }
-
-        function initGame(sender) {
-            document.querySelector('.container').classList.add('hidden');
-            document.getElementById('bg-decoration').style.display = 'none';
-
-            const gameLayer = document.getElementById('screen-garden');
-            gameLayer.style.display = 'block';
-            
-            // Create MORE roses (30) to fill gaps
-            for(let i=0; i<30; i++) {
-                createGameRose(sender, gameLayer);
-            }
-        }
-
-        function createGameRose(sender, container) {
-            const rose = document.createElement('div');
-            rose.innerHTML = '🌹';
-            rose.classList.add('floating-rose');
-            
-            // Random Position - 5% to 85% to ensure they are on screen
-            const x = Math.random() * 85 + 5; 
-            const y = Math.random() * 85 + 5; 
-            
-            rose.style.left = x + '%';
-            rose.style.top = y + '%';
-            
-            // Add a slight delay to animation so they don't all move in sync
-            // But we REMOVED the float animation to make them easier to click!
-            // Instead, just a gentle pulse
-            rose.style.animation = `pulse ${Math.random() * 2 + 1}s infinite`;
-
-            // CLICK EVENT (Click + Touch)
-            const handleInteract = function(e) {
-                e.preventDefault(); // Stop double firing
-                e.stopPropagation(); // Stop bubbling
-                revealMessage(sender);
-            };
-
-            rose.onclick = handleInteract;
-            rose.ontouchstart = handleInteract;
-
-            container.appendChild(rose);
-        }
-
-        function revealMessage(sender) {
-            document.getElementById('screen-garden').style.display = 'none';
-            document.querySelector('.container').classList.remove('hidden');
-            document.getElementById('screen-reveal').classList.remove('hidden');
-
-            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-            document.getElementById('finalMessage').textContent = randomQuote;
-            document.getElementById('revealSender').textContent = sender;
-            
-            confettiEffect();
-        }
-
-        function confettiEffect() {
-            const colors = ['❤️', '🌹', '✨', '💖'];
-            for(let i=0; i<50; i++) {
-                const conf = document.createElement('div');
-                conf.innerText = colors[Math.floor(Math.random()*colors.length)];
-                conf.style.position = 'fixed';
-                conf.style.left = '50%';
-                conf.style.top = '50%';
-                conf.style.fontSize = (Math.random() * 20 + 10) + 'px';
-                conf.style.transition = 'all 1s ease-out';
-                conf.style.zIndex = '3000';
-                conf.style.pointerEvents = 'none';
-                document.body.appendChild(conf);
-
-                setTimeout(() => {
-                    const x = (Math.random() - 0.5) * window.innerWidth * 1.
+            <p style="color: #ffdde1; font-weight: bold; font-size:
